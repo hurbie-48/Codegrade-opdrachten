@@ -1,19 +1,73 @@
-# A dataset is given with information of students: student number, first name, last name, date of birth, study program. You are asked to implement a program that given this dataset (as a csv file), the program processes the information. Sometimes data values are corrupted. The program must report corrupted values.
-# Criteria:
+import csv
+import re
 
-#     Any invalid or empty value is defined as corrupted.
-#     Student number has this format: 7 digits, starting with 0 and second digit (from left) can be either 9 or 8.
-#     Example: 0212345 is not valid
-#     First name and last names, contains only alphabet.
-#     Date of birth has this format: YYYY-MM-DD. Days between 1 and 31, months between 1 and 12 and Years between 1960 and 2004.
-#     Study program can have one of these values: INF, TINF, CMD, AI.
 
-# Extra:
+def validate_data(row):
+    errors = []
 
-# A template Python file is provided with a function that loads the data set.
-# The program should make two separate lists: list of rows with correct values and a list of rows with corrupted values.
-# Within the template the headers that are required are already present.
-# Input example:
+    student_number = str(row.get('studentnumber', '')).strip()
+    is_valid_sn = (
+        len(student_number) == 7 and
+        student_number.startswith('0') and
+        student_number[1] in ('8', '9') and
+        student_number.isdigit()
+    )
+    if not is_valid_sn:
+        errors.append(student_number)
 
-# No input is given
+    first_name = str(row.get('firstname', '')).strip()
+    if not (first_name and first_name.isalpha()):
+        errors.append(first_name)
 
+    last_name = str(row.get('lastname', '')).strip()
+    if not (last_name and last_name.replace(" ", "").isalpha()):
+        errors.append(last_name)
+
+    dob = str(row.get('dateofbirth', '')).strip()
+    match = re.match(r'^(\d{4})-(\d{2})-(\d{2})$', dob)
+    if not match:
+        errors.append(dob)
+    else:
+        y, m, d = map(int, match.groups())
+        if not (1960 <= y <= 2004 and 1 <= m <= 12 and 1 <= d <= 31):
+            errors.append(dob)
+
+    prog = str(row.get('studyprogram', '')).strip()
+    if prog not in ['INF', 'TINF', 'CMD', 'AI']:
+        errors.append(prog)
+
+    return errors
+
+
+def process_students(file_name):
+    correct = []
+    corrupted = []
+
+    try:
+        with open(file_name, mode='r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                validation_errors = validate_data(row)
+                line_str = ",".join(row.values())
+
+                if not validation_errors:
+                    correct.append(line_str)
+                else:
+                    msg = f"{line_str} => INVALID DATA: {validation_errors}"
+                    corrupted.append(msg)
+    except FileNotFoundError:
+        pass
+
+    return correct, corrupted
+
+
+if __name__ == "__main__":
+    correct_lines, corrupt_lines = process_students('students.csv')
+
+    print("### VALID LINES ###")
+    for line in correct_lines:
+        print(line)
+
+    print("\n### CORRUPT LINES ###")
+    for line in corrupt_lines:
+        print(line)
