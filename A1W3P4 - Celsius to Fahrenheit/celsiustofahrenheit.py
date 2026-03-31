@@ -5,5 +5,5 @@ def celciusToFahrenheit(celcius:int) -> int:
 print("°C °F")
 for i in range(10):
     i+=1
-    print(f"{i*10} {celciusToFahrenheit(i*10)}") 
+    print(f"{i*10} {celciusToFahrenheit(i*10)}")
 
