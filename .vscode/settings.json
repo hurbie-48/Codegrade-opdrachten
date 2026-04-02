@@ -1,0 +1,7 @@
+{
+    "python.testing.pytestArgs": [
+        "A2W5P2 - Taxi Fares"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}
