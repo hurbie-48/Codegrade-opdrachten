@@ -1,0 +1,1 @@
+exec("w=input();L=set();f=9\nwhile f and{*w}-L:l=input(f\"{''.join(c if c in L else'_'for c in w)}({f})\");f-=l not in w;L|={l}\nprint(w)")
