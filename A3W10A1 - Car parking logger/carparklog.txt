@@ -1,0 +1,7 @@
+29-05-2026 10:42:25;cpm_name=North;license_plate=AA1234;action=check-in
+29-05-2026 10:43:50;cpm_name=North;license_plate=AA-1234;action=check-in
+29-05-2026 10:44:15;cpm_name=North;license_plate=AA-1234;action=check-out;parking_fee=2
+29-05-2026 10:44:27;cpm_name=North;license_plate=AA-1234;action=check-in
+29-05-2026 10:44:38;cpm_name=North;license_plate=BB-1234;action=check-in
+29-05-2026 11:05:26;cpm_name=North;license_plate=AA-1234;action=check-out;parking_fee=2
+29-05-2026 11:05:29;cpm_name=North;license_plate=AA-1234;action=check-in

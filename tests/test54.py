@@ -1,7 +1,4 @@
 try:
-    result = 10 / 2
+    result = 10 / 0
 except ZeroDivisionError:
-    print("Error")
-
-else:
-    print(result)
+    print("Kan niet door 0 delen!")
