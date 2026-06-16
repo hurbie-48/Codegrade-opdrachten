@@ -1,6 +1,6 @@
 import re
 licenseplate = input("License: ").strip()
-def isLicenceplateValid(licenceplate:str) -> str:
+def isLicenceplateValid() -> None:
     patterns = [
         r"^[A-Z]{2}-\d{2}-\d{2}$", 
         r"^\d{2}-\d{2}-[A-Z]{2}$",  
@@ -20,4 +20,4 @@ def isLicenceplateValid(licenceplate:str) -> str:
         print("Valid")
     else:
         print("Invalid")
-isLicenceplateValid(licenseplate)
+isLicenceplateValid()
