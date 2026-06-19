@@ -1,22 +1,22 @@
 import sqlite3
 
 
-def execute_query(query:str):
+def execute_query(query: str):
     sqliteConnection = sqlite3.connect("trades.db")
     cursor = sqliteConnection.cursor()
     cursor.execute(query)
-    result = cursor.fetchall()
+    result_of_query = cursor.fetchall()
     cursor.close()
     sqliteConnection.close()
-    return result
+    return result_of_query
+
 
 class Country:
 
-    # Representation method
-    # This will format the output in the correct order
-    # Format is @dataclass-style: Classname(attr=value, attr2=value2, ...)
-    def __init__(self, name):
+    def __init__(self, id=None, name=None, short_code=None):
+        self.id = id
         self.name = name
+        self.short_code = short_code
 
     def __repr__(self) -> str:
         sorted_items = sorted(self.__dict__.items(), key=lambda item: item[0])
@@ -27,24 +27,24 @@ class Country:
 
     def get_all_trades(self):
         query = f"""
-            SELECT trades.* FROM trades
-            INNER JOIN countries ON trades.from_country_id = countries.id
-            WHERE countries.name = '{self.name}'
+            SELECT * FROM trades
+            WHERE CAST(from_country_id AS TEXT) = '{self.id}'
+               OR CAST(to_country_id AS TEXT) = '{self.id}'
+               OR UPPER(TRIM(to_country_id)) = '{str(self.short_code).upper()}'
         """
         return execute_query(query)
 
     def get_from_trades(self):
         query = f"""
-            SELECT trades.from_country_id FROM trades
-            INNER JOIN countries ON trades.from_country_id = countries.id
-            WHERE countries.name = '{self.name}'
+            SELECT * FROM trades
+            WHERE CAST(from_country_id AS TEXT) = '{self.id}'
         """
         return execute_query(query)
 
     def get_to_trades(self):
         query = f"""
-               SELECT trades.to_country_id FROM trades
-               INNER JOIN countries ON trades.from_country_id = countries.id
-               WHERE countries.name = '{self.name}'
-           """
+            SELECT * FROM trades
+            WHERE CAST(to_country_id AS TEXT) = '{self.id}'
+               OR UPPER(TRIM(to_country_id)) = '{str(self.short_code).upper()}'
+        """
         return execute_query(query)

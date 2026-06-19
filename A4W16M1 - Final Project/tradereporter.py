@@ -8,18 +8,18 @@ def execute_query(query: str):
     sqlite_connection = sqlite3.connect("trades.db")
     cursor = sqlite_connection.cursor()
     cursor.execute(query)
-    result = cursor.fetchall()
+    result_of_query = cursor.fetchall()
     cursor.close()
     sqlite_connection.close()
-    return result
+    return result_of_query
 
 
 class Reporter:
     # 1. How many different products are there? -> int
     def total_amount_of_products(self) -> int:
         query = "SELECT COUNT(*) FROM products;"
-        result = execute_query(query)
-        return result[0][0]
+        result_of_query = execute_query(query)
+        return result_of_query[0][0]
 
     # 2. Which country has the most trade records? -> Country
     def country_with_most_trade_records(self) -> Country:
@@ -34,10 +34,10 @@ class Reporter:
             ORDER BY COUNT(*) DESC
             LIMIT 1;
         """
-        result = execute_query(query)
-        if not result:
+        result_of_query = execute_query(query)
+        if not result_of_query:
             return None
-        top_country_id = result[0][0]
+        top_country_id = result_of_query[0][0]
         country_query = f"SELECT name, short_code FROM countries WHERE id = '{top_country_id}';"
         country_info = execute_query(country_query)
         if country_info:
@@ -57,10 +57,10 @@ class Reporter:
             ORDER BY total_val DESC
             LIMIT 1;
         """
-        result = execute_query(query)
-        if not result:
+        result_of_query = execute_query(query)
+        if not result_of_query:
             return None
-        top_product_id = result[0][0]
+        top_product_id = result_of_query[0][0]
         prod_query = f"SELECT title FROM products WHERE id = '{top_product_id}';"
         prod_info = execute_query(prod_query)
         if prod_info:
@@ -82,10 +82,10 @@ class Reporter:
             ORDER BY total_export DESC
             LIMIT 1;
         """
-        result = execute_query(query)
-        if not result:
+        result_of_query = execute_query(query)
+        if not result_of_query:
             return None
-        top_country_id = result[0][0]
+        top_country_id = result_of_query[0][0]
         country_query = f"SELECT name, short_code FROM countries WHERE id = '{top_country_id}';"
         country_info = execute_query(country_query)
         if country_info:
@@ -105,10 +105,10 @@ class Reporter:
             ORDER BY total_import DESC
             LIMIT 1;
         """
-        result = execute_query(query)
-        if not result:
+        result_of_query = execute_query(query)
+        if not result_of_query:
             return None
-        top_country_id = result[0][0]
+        top_country_id = result_of_query[0][0]
         country_query = f"SELECT name, short_code FROM countries WHERE id = '{top_country_id}';"
         country_info = execute_query(country_query)
         if country_info:
@@ -122,25 +122,25 @@ class Reporter:
     # 6. Which country has the net highest trade value (export - import)? -> Country
     def country_with_highest_net_trade_value(self) -> Country:
         query = """
-            SELECT 
+            SELECT
                 c.id,
                 COALESCE(e.total_export, 0) - COALESCE(i.total_import, 0) AS net_value
             FROM countries c
             LEFT JOIN (
-                SELECT from_country_id, SUM(CAST(value AS REAL)) as total_export 
+                SELECT from_country_id, SUM(CAST(value AS REAL)) as total_export
                 FROM trades GROUP BY from_country_id
             ) e ON c.id = e.from_country_id
             LEFT JOIN (
-                SELECT to_country_id, SUM(CAST(value AS REAL)) as total_import 
+                SELECT to_country_id, SUM(CAST(value AS REAL)) as total_import
                 FROM trades GROUP BY to_country_id
             ) i ON c.id = i.to_country_id
             ORDER BY net_value DESC
             LIMIT 1;
         """
-        result = execute_query(query)
-        if not result:
+        result_of_query = execute_query(query)
+        if not result_of_query:
             return None
-        top_country_id = result[0][0]
+        top_country_id = result_of_query[0][0]
         country_query = f"SELECT name, short_code FROM countries WHERE id = '{top_country_id}';"
         country_info = execute_query(country_query)
         if country_info:
@@ -162,8 +162,8 @@ class Reporter:
             WHERE t.from_country_id = '{c_id_str}'
             GROUP BY p.title;
         """
-        result = execute_query(query)
-        export_dict = {title: round(avg_val, 2) for title, avg_val in result}
+        result_of_query = execute_query(query)
+        export_dict = {title: round(avg_val, 2) for title, avg_val in result_of_query}
         filenames = [
             f"Average export trade value per product for country {c_id_str}.csv",
             f"Average export trade value per category for country {c_id_str}.csv"
@@ -180,21 +180,21 @@ class Reporter:
     def products_sorted_by_average_export_value_per_mt(self) -> list[tuple[Product, float]]:
         # Filters out any internal self-trading anomalies while keeping global export rows visible
         query = """
-            SELECT p.id, p.title, 
+            SELECT p.id, p.title,
                    (SUM(CAST(t.value AS REAL)) / SUM(CAST(t.quantity AS REAL))) * 1000.0 as aggregate_val_per_mt
             FROM trades t
             JOIN products p ON t.product_id = p.id
-            WHERE t.from_country_id IS NOT NULL 
+            WHERE t.from_country_id IS NOT NULL
               AND t.from_country_id != COALESCE(t.to_country_id, '')
-              AND t.value IS NOT NULL 
+              AND t.value IS NOT NULL
               AND CAST(t.quantity AS REAL) > 0
             GROUP BY p.id, p.title
             ORDER BY aggregate_val_per_mt DESC;
         """
-        result = execute_query(query)
+        result_of_query = execute_query(query)
 
         sorted_products_list = []
-        for prod_id, prod_title, avg_val in result:
+        for prod_id, prod_title, avg_val in result_of_query:
             product = Product("")
             product.id = int(prod_id)
             product.title = prod_title
@@ -223,7 +223,7 @@ class Reporter:
     # 10 & 11. Trade report per country -> list[tuple[Country, float, float, int, int, float]]
     def trade_report_per_country(self, to_csv: bool = False) -> list[tuple[Country, float, float, int, int, float]]:
         query = """
-            SELECT 
+            SELECT
                 c.id, c.name, c.short_code,
                 COALESCE(e.total_export_val, 0.0) as total_export_value,
                 COALESCE(i.total_import_val, 0.0) as total_import_value,
@@ -231,23 +231,23 @@ class Reporter:
                 COALESCE(i.total_import_quantity, 0) as total_import_quantity
             FROM countries c
             LEFT JOIN (
-                SELECT from_country_id, 
-                       SUM(CAST(value AS REAL)) as total_export_val, 
-                       SUM(CAST(quantity AS INTEGER)) as total_export_quantity 
-                FROM trades 
+                SELECT from_country_id,
+                       SUM(CAST(value AS REAL)) as total_export_val,
+                       SUM(CAST(quantity AS INTEGER)) as total_export_quantity
+                FROM trades
                 GROUP BY from_country_id
             ) e ON c.id = e.from_country_id
             LEFT JOIN (
-                SELECT to_country_id, 
-                       SUM(CAST(value AS REAL)) as total_import_val, 
-                       SUM(CAST(quantity AS INTEGER)) as total_import_quantity 
-                FROM trades 
+                SELECT to_country_id,
+                       SUM(CAST(value AS REAL)) as total_import_val,
+                       SUM(CAST(quantity AS INTEGER)) as total_import_quantity
+                FROM trades
                 GROUP BY to_country_id
             ) i ON c.id = i.to_country_id;
         """
-        result = execute_query(query)
+        result_of_query = execute_query(query)
         report_data = []
-        for row in result:
+        for row in result_of_query:
             c_id = int(row[0])
             c_name = row[1]
             c_short = row[2]
@@ -287,9 +287,9 @@ class Reporter:
     # 12. Get all countries that export more than N MT per year on average -> list[Country]
     def countries_exporting_more_than_n_mt_per_year(self, n: float) -> list[Country]:
         query = """
-            SELECT 
-                c.id, 
-                c.name, 
+            SELECT
+                c.id,
+                c.name,
                 c.short_code,
                 (SUM(CAST(t.quantity AS REAL)) / COUNT(DISTINCT t.year)) as avg_yearly_qty
             FROM trades t
@@ -300,12 +300,12 @@ class Reporter:
         sqlite_connection = sqlite3.connect("trades.db")
         cursor = sqlite_connection.cursor()
         cursor.execute(query, (n,))
-        result = cursor.fetchall()
+        result_of_query = cursor.fetchall()
         cursor.close()
         sqlite_connection.close()
 
         countries_list = []
-        for row in result:
+        for row in result_of_query:
             c_id, c_name, c_short, _ = row
             country = Country(name=c_name)
             country.id = int(c_id)

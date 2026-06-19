@@ -1,6 +1,5 @@
 import json
 import sqlite3
-import re
 
 
 def clean_numeric(value_str):
@@ -37,10 +36,10 @@ def clean_numeric(value_str):
 
 def nuke_and_rebuild_database(json_path, db_path):
     with open(json_path, "r") as file:
-        data = json.load(file)
+        json_data = json.load(file)
 
-    if isinstance(data, dict):
-        data = [data]
+    if isinstance(json_data, dict):
+        json_data = [json_data]
 
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -50,7 +49,7 @@ def nuke_and_rebuild_database(json_path, db_path):
     cursor.execute("DELETE FROM countries;")
     conn.commit()
 
-    for item in data:
+    for item in json_data:
         from_country_id = int(item["country_code"])
         from_country_name = item["country_name"]
         from_country_iso2 = item["country_iso2"]
@@ -94,6 +93,7 @@ def nuke_and_rebuild_database(json_path, db_path):
 
     conn.commit()
     conn.close()
+
 
 if __name__ == "__main__":
     nuke_and_rebuild_database("trades.json", "trades.db")

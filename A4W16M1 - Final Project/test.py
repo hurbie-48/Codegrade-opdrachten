@@ -2,4 +2,4 @@ from tradereporter import Reporter
 
 r = Reporter()
 
-print(r.products_sorted_by_average_export_value_per_mt())
+print(r.countries_exporting_more_than_n_mt_per_year(1000))

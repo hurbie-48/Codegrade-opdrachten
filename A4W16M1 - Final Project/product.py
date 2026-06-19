@@ -5,10 +5,10 @@ def execute_query(query: str):
     sqliteConnection = sqlite3.connect("trades.db")
     cursor = sqliteConnection.cursor()
     cursor.execute(query)
-    result = cursor.fetchall()
+    result_of_query = cursor.fetchall()
     cursor.close()
     sqliteConnection.close()
-    return result
+    return result_of_query
 
 
 def get_all_products() -> list[tuple[str]]:
@@ -19,9 +19,10 @@ def get_all_products() -> list[tuple[str]]:
 
 
 class Product:
-
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, id=None, title=None):
+        self.id = id
+        self.title = title
+        self.name = title
 
     # Representation method
     # This will format the output in the correct order
@@ -36,6 +37,5 @@ class Product:
     def get_trades(self):
         query = f"""SELECT trades.* FROM trades
         INNER JOIN products ON trades.product_id = products.id
-        WHERE products.title = '{self.name}'"""
+        WHERE products.title = '{str(self.title).upper()}'"""
         return execute_query(query)
-
